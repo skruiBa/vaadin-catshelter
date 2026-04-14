@@ -1,0 +1,114 @@
+/* =========================================================
+   CatShelter – Globaali teema (styles.css)
+   Vaatimus 1: oma fontti, väripaletti, kaarevuus
+   ========================================================= */
+
+/* 1. Google Font – Nunito */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
+/* ----------------------------------------------------------
+   Lumo-muuttujien ylikirjoitukset – väripaletti & fontti
+   ---------------------------------------------------------- */
+html {
+    /* Fontti */
+    --lumo-font-family: 'Nunito', sans-serif;
+
+    /* Väripaletti */
+    --lumo-primary-color: #2d2876;
+    --lumo-primary-color-50pct: rgba(45, 40, 118, 0.5);
+    --lumo-primary-color-10pct: rgba(45, 40, 118, 0.1);
+    --lumo-primary-text-color: #2d2876;
+    --lumo-primary-contrast-color: #ffffff;
+
+    /* Aksenttiväri */
+    --lumo-error-color: #c0392b;
+    --cs-accent: #5f75d6;
+    --cs-secondary: #d89594;
+    --cs-text: #050815;
+
+    /* Taustavärit */
+    --lumo-base-color: #eff1fb;
+    --lumo-body-text-color: #050815;
+    --lumo-tint-5pct: rgba(255, 255, 255, 0.05);
+    --lumo-shade-50pct: rgba(5, 8, 21, 0.5);
+
+    /* Kaarevuus – pyöristetyt kulmat */
+    --lumo-border-radius-s: 8px;
+    --lumo-border-radius-m: 12px;
+    --lumo-border-radius-l: 18px;
+
+    /* Nappien syvyys / box-shadow */
+    --lumo-box-shadow-xs: 0 1px 3px rgba(45, 40, 118, 0.15);
+    --lumo-box-shadow-s: 0 2px 8px rgba(45, 40, 118, 0.2);
+    --lumo-box-shadow-m: 0 4px 16px rgba(45, 40, 118, 0.25);
+    --lumo-box-shadow-l: 0 8px 24px rgba(45, 40, 118, 0.3);
+}
+
+/* ----------------------------------------------------------
+   Vaatimus 5: stat-kortti hover / focus / transition
+   ---------------------------------------------------------- */
+.stat-card {
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+    cursor: default;
+}
+
+.stat-card:hover {
+    transform: scale(1.03);
+    box-shadow: var(--lumo-box-shadow-m);
+}
+
+.stat-card:focus-within {
+    outline: 2px solid var(--lumo-primary-color);
+    outline-offset: 3px;
+}
+
+/* ----------------------------------------------------------
+   Vaatimus 3: Näkymäkohtainen CSS – vaikuttaa VAIN cats-view
+   -luokkaan. Useita Vaadin-komponentteja samassa näkymässä.
+   ---------------------------------------------------------- */
+.cats-view h2 {
+    color: var(--lumo-primary-color);
+    letter-spacing: -0.5px;
+}
+
+.cats-view vaadin-grid {
+    border-radius: var(--lumo-border-radius-l);
+    box-shadow: var(--lumo-box-shadow-s);
+}
+
+.cats-view vaadin-button[theme~='primary'] {
+    box-shadow: var(--lumo-box-shadow-s);
+}
+
+.cats-view vaadin-text-field,
+.cats-view vaadin-combo-box,
+.cats-view vaadin-date-picker {
+    border-radius: var(--lumo-border-radius-m);
+}
+
+/* ----------------------------------------------------------
+   App-layout / drawer visuaalinen erottuminen
+   ---------------------------------------------------------- */
+vaadin-app-layout::part(drawer) {
+    background: var(--lumo-base-color);
+    box-shadow: var(--lumo-box-shadow-m);
+    border-right: 2px solid var(--lumo-primary-color-10pct);
+}
+
+vaadin-side-nav-item::part(item) {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+vaadin-side-nav-item[active]::part(item) {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    font-weight: 700;
+}
+
+/* Footer erottuminen */
+vaadin-app-layout footer {
+    background: var(--lumo-contrast-5pct);
+    border-top: 2px solid var(--lumo-primary-color-10pct);
+}

@@ -1,0 +1,29 @@
+/* =========================================================
+   vaadin-button.css — Vaatimus 5: hover, focus, transition
+   Vaikuttaa kaikkiin vaadin-button-komponentteihin teemassa
+   ========================================================= */
+
+:host {
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        filter 0.15s ease;
+}
+
+/* Hover – nousee hieman ylös */
+:host(:not([disabled]):hover) {
+    transform: translateY(-2px);
+    box-shadow: var(--lumo-box-shadow-s);
+}
+
+/* Focus – selkeä korostusrengas */
+:host(:focus-visible) {
+    outline: 2px solid var(--lumo-primary-color);
+    outline-offset: 2px;
+}
+
+/* Active – painuu alas */
+:host(:not([disabled]):active) {
+    transform: translateY(0);
+    filter: brightness(0.95);
+}
