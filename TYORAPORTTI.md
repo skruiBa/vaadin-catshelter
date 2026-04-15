@@ -2,7 +2,7 @@
 
 **Sovellus:** CatShelter – kissatarhan hallintajärjestelmä
 **Teknologiat:** Vaadin 24.6.6, Spring Boot 3.4.4, Java 21, H2 (dev) / PostgreSQL (tuotanto), Docker
-**GitHub:** [LISÄÄ LINKKI]
+**GitHub:** https://github.com/skruiBa/vaadin-catshelter
 
 ---
 
