@@ -4,6 +4,7 @@ import com.example.demo.entity.AppUser;
 import com.example.demo.entity.Role;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.ProfileImageStorageService;
+import com.example.demo.service.RegistrationNotificationService;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -37,13 +38,16 @@ public class RegisterView extends VerticalLayout {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final ProfileImageStorageService profileImageStorageService;
+    private final RegistrationNotificationService registrationNotificationService;
 
     public RegisterView(UserRepository userRepository,
             PasswordEncoder passwordEncoder,
-            ProfileImageStorageService profileImageStorageService) {
+            ProfileImageStorageService profileImageStorageService,
+            RegistrationNotificationService registrationNotificationService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.profileImageStorageService = profileImageStorageService;
+        this.registrationNotificationService = registrationNotificationService;
 
         setSizeFull();
         setAlignItems(FlexComponent.Alignment.CENTER);
@@ -147,6 +151,7 @@ public class RegisterView extends VerticalLayout {
             }
 
             userRepository.save(user);
+            registrationNotificationService.notifyAdminNewUser(user);
 
             Notification.show("Rekisteröityminen onnistui! Voit nyt kirjautua sisään.",
                     3000, Notification.Position.MIDDLE);

@@ -27,6 +27,8 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.PageTitle;
@@ -35,8 +37,14 @@ import com.vaadin.flow.server.StreamResource;
 import jakarta.annotation.security.PermitAll;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Route(value = "kissat", layout = MainLayout.class)
@@ -49,6 +57,7 @@ public class CatsView extends VerticalLayout {
 
     private final Grid<Cat> grid = new Grid<>(Cat.class, false);
     private Cat currentCat;
+    private static final String DEFAULT_IMPORTED_IMAGE_URL = "https://placehold.co/400x300?text=Imported+Cat";
 
     public CatsView(CatRepository catRepository, TagRepository tagRepository) {
         this.catRepository = catRepository;
@@ -65,10 +74,11 @@ public class CatsView extends VerticalLayout {
         addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         Anchor exportCsvLink = createCsvExportLink();
+        Upload importCsvUpload = createCsvImportUpload();
 
         configureGrid();
 
-        HorizontalLayout actions = new HorizontalLayout(addBtn, exportCsvLink);
+        HorizontalLayout actions = new HorizontalLayout(addBtn, exportCsvLink, importCsvUpload);
         actions.setAlignItems(Alignment.CENTER);
 
         add(new H2("Kissat 🐱"), actions, grid);
@@ -87,6 +97,146 @@ public class CatsView extends VerticalLayout {
         exportCsvLink.add(exportBtn);
 
         return exportCsvLink;
+    }
+
+    private Upload createCsvImportUpload() {
+        MemoryBuffer csvBuffer = new MemoryBuffer();
+        Upload upload = new Upload(csvBuffer);
+        upload.setMaxFiles(1);
+        upload.setAcceptedFileTypes(".csv", "text/csv");
+        upload.setDropAllowed(false);
+
+        Button uploadBtn = new Button("Tuo CSV", VaadinIcon.UPLOAD.create());
+        uploadBtn.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+        upload.setUploadButton(uploadBtn);
+
+        upload.addSucceededListener(event -> {
+            try (InputStream in = csvBuffer.getInputStream()) {
+                String csvText = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+                int importedRows = importCatsFromCsv(csvText);
+                refreshGrid();
+                showSuccess("CSV-tuonti valmis, tuotu " + importedRows + " riviä.");
+            } catch (IOException ex) {
+                showError("CSV-tuonti epäonnistui: " + ex.getMessage());
+            }
+        });
+
+        upload.addFileRejectedListener(event -> showError("Tiedoston tuonti epäonnistui: " + event.getErrorMessage()));
+        return upload;
+    }
+
+    private int importCatsFromCsv(String csvContent) {
+        if (csvContent == null || csvContent.isBlank()) {
+            return 0;
+        }
+
+        String[] lines = csvContent.split("\\r?\\n");
+        if (lines.length <= 1) {
+            return 0;
+        }
+
+        int imported = 0;
+
+        for (int i = 1; i < lines.length; i++) {
+            String line = lines[i].trim();
+            if (line.isBlank()) {
+                continue;
+            }
+
+            try {
+                List<String> cols = parseCsvLine(line);
+                if (cols.size() < 8) {
+                    continue;
+                }
+
+                Cat cat = new Cat();
+                cat.setName(cols.get(0));
+                cat.setBreed(cols.get(1));
+                cat.setBirthDate(LocalDate.parse(cols.get(2)));
+                cat.setGender(parseGender(cols.get(3)));
+                cat.setColor(cols.get(4));
+                cat.setWeight(Double.parseDouble(cols.get(5)));
+                cat.setArrivalDate(LocalDate.parse(cols.get(6)));
+                cat.setImageUrl(DEFAULT_IMPORTED_IMAGE_URL);
+                cat.setDescription("Tuotu CSV-tiedostosta");
+
+                Set<Tag> tags = parseOrCreateTags(cols.get(7));
+                cat.setTags(tags);
+
+                catRepository.save(cat);
+                imported++;
+            } catch (Exception ignored) {
+                // Skip malformed CSV rows and continue importing valid ones.
+            }
+        }
+
+        return imported;
+    }
+
+    private Set<Tag> parseOrCreateTags(String tagCell) {
+        Set<Tag> tags = new HashSet<>();
+        if (tagCell == null || tagCell.isBlank()) {
+            return tags;
+        }
+
+        String[] parts = tagCell.split("\\|");
+        for (String rawPart : parts) {
+            String name = rawPart == null ? "" : rawPart.trim();
+            if (name.isBlank()) {
+                continue;
+            }
+
+            Tag tag = tagRepository.findByNameIgnoreCase(name)
+                    .orElseGet(() -> {
+                        Tag created = new Tag();
+                        created.setName(name);
+                        created.setCategory("Tuotu");
+                        created.setDescription("Luotu CSV-tuonnin yhteydessä");
+                        created.setColorCode("#607D8B");
+                        created.setIcon("TAG");
+                        return tagRepository.save(created);
+                    });
+            tags.add(tag);
+        }
+        return tags;
+    }
+
+    private List<String> parseCsvLine(String line) {
+        List<String> values = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        boolean inQuotes = false;
+
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+
+            if (c == '"') {
+                if (inQuotes && i + 1 < line.length() && line.charAt(i + 1) == '"') {
+                    current.append('"');
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (c == ',' && !inQuotes) {
+                values.add(current.toString().trim());
+                current.setLength(0);
+            } else {
+                current.append(c);
+            }
+        }
+
+        values.add(current.toString().trim());
+        return values;
+    }
+
+    private Gender parseGender(String value) {
+        if (value == null || value.isBlank()) {
+            return Gender.UNKNOWN;
+        }
+        try {
+            return Gender.valueOf(value.trim().toUpperCase());
+        } catch (Exception ex) {
+            return Gender.UNKNOWN;
+        }
     }
 
     private String generateCatsCsv() {

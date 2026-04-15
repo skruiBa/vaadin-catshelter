@@ -34,19 +34,26 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         i18n.getForm().setUsername("Käyttäjänimi");
         i18n.getForm().setPassword("Salasana");
         i18n.getForm().setSubmit("Kirjaudu sisään");
+        i18n.getForm().setForgotPassword("Unohtuiko salasana?");
         i18n.getErrorMessage().setTitle("Virheellinen käyttäjänimi tai salasana");
         i18n.getErrorMessage().setMessage("Tarkista käyttäjänimi ja salasana.");
         loginForm.setI18n(i18n);
         loginForm.setAction("login");
-        loginForm.setForgotPasswordButtonVisible(false);
+        loginForm.setForgotPasswordButtonVisible(true);
+        loginForm.addForgotPasswordListener(e -> UI.getCurrent().navigate("forgot-password"));
 
         Anchor registerLink = new Anchor("/register", "Rekisteröidy");
         registerLink.getStyle().set("margin-top", "var(--lumo-space-m)");
+
+        Button githubLogin = new Button("Kirjaudu GitHubilla", e -> UI.getCurrent().getPage()
+                .setLocation("/oauth2/authorization/github"));
+        githubLogin.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
         add(
                 new H2("🐱 CatShelter"),
                 new Paragraph("Kissatarhan hallintajärjestelmä"),
                 loginForm,
+                githubLogin,
                 registerLink);
     }
 

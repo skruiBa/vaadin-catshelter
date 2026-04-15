@@ -3,6 +3,8 @@ package com.example.demo.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import java.util.Set;
 
@@ -11,8 +13,9 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Audited
 @Table(name = "app_users")
-public class AppUser {
+public class AppUser extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,6 +34,7 @@ public class AppUser {
 
     /** BCrypt-hashattu salasana — ei koskaan tallenneta selväkielisenä */
     @NotBlank
+    @NotAudited
     @Column(nullable = false)
     private String passwordHash;
 

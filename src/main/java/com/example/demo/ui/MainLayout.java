@@ -75,11 +75,12 @@ public class MainLayout extends AppLayout {
         SideNavItem tags = new SideNavItem("Tagit", "tagit", VaadinIcon.TAG.create());
         SideNavItem search = new SideNavItem("Haku", "haku", VaadinIcon.SEARCH.create());
         SideNavItem notes = new SideNavItem("Muistiinpanot", "muistiinpanot", VaadinIcon.EDIT.create());
+        SideNavItem history = new SideNavItem("Historia", "historia", VaadinIcon.TIME_BACKWARD.create());
 
         nav.addItem(dashboard);
 
         if (isLoggedIn()) {
-            nav.addItem(cats, adoptions, search, notes);
+            nav.addItem(cats, adoptions, search, notes, history);
         }
         if (hasRole("ROLE_SUPER") || hasRole("ROLE_USER")) {
             nav.addItem(health);
