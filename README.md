@@ -2,6 +2,8 @@
 
 Kissatarhan hallintajärjestelmä. Vaadin 24 + Spring Boot 3.4 + Java 21.
 
+GitHub OAuth client-id ja client-secret on commitoitu repoon tarkoituksellisesti opettajan testaamista varten. Callback URL on rajoitettu localhost:8080-osoitteeseen.
+
 ## Käynnistys
 
 ```bash
