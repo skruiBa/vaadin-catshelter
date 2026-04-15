@@ -16,10 +16,14 @@ Avaa: http://localhost:8080
 docker compose up --build
 ```
 
+## Työraportti
+
+TYORAPORTTI.md
+
 ## Tunnukset
 
 | Käyttäjä  | Salasana | Rooli      |
-|-----------|----------|------------|
+| --------- | -------- | ---------- |
 | admin     | admin123 | ROLE_ADMIN |
 | superuser | super123 | ROLE_SUPER |
 | user      | user123  | ROLE_USER  |
